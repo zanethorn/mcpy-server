@@ -8,13 +8,14 @@ from aioconsole import ainput
 
 
 async def run_client():
+    async def get_input():
+        raw = await ainput(">>>")
+        await socket.send(raw)
+        print(f"> {raw}")
+
     async with websockets.connect('ws://localhost:8765') as socket:
+        event_loop.create_task(get_input())
         while True:
-            raw = await ainput(">>>")
-
-            await socket.send(raw)
-            print(f"> {raw}")
-
             resp = await socket.recv()
             print(f"< {resp}")
 

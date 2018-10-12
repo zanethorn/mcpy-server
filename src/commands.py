@@ -3,7 +3,12 @@ from messages import Message, MessageBody, MessageHeader
 
 
 class CommandMeta(type):
-    pass
+    commands = {}
+
+    def __new__(cls, name, bases, dct):
+        tp = super().__new__(cls, name, bases, dct)
+        cls.commands[name.lower()] = tp
+        return tp
 
 
 class CommandHeader(MessageHeader):
@@ -40,6 +45,17 @@ class Fill(Command):
                          replaceDataValue=replaceDataValue,
                          **kwargs)
 
+
+class Teleport(Command):
+    def __init__(self, target, x1, y1, z1, **kwargs):
+        super().__init__(target=target,
+                         x1=x1,
+                         y1=y1,
+                         z1=z1,
+                         **kwargs)
+
+
+Tp = Teleport
 
 BLOCK_LIMIT = 65000
 

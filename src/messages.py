@@ -67,10 +67,16 @@ class Message():
     def serialize(self):
         return {"header": self.header.serialize(), "body": self.body.serialize()}
 
+    async def send_to(self, socket):
+        me = str(self)
+        await socket.send(me)
+        print(f"Sent {me}")
+        result = await socket.recv()
+        print(f"got {result}")
+        return result
+
     def __str__(self):
         return json.dumps(self.serialize())
-
-
 
 
 if __name__ == "__main__":

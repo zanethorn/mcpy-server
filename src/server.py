@@ -5,6 +5,7 @@
 import asyncio
 from aioconsole import ainput
 import websockets
+import commands
 
 
 class McServer:
@@ -22,15 +23,11 @@ class McServer:
                 while self.is_online:
                     raw = await ainput(">>>")
                     print(f"Console got: {raw}")
-                    messages = list(self.process(raw))
-                    for msg in messages:
-                        for s in self.sockets:
-                            await socket.send(msg)
-                            resp = await socket.recv()
-                            msg(resp)
-
+                    cmd = self.process(raw)
+                    for s in self.sockets:
+                        await cmd.send_to(s)
             except Exception as ex:
-                self.terminate(ex)
+                self.terminate(str(ex))
 
         async def query_socket(socket, path):
             print("Client Connected")
@@ -62,12 +59,16 @@ class McServer:
         except KeyboardInterrupt:
             pass
         except Exception as ex:
-            self.terminate(ex)
+            self.terminate(str(ex))
         finally:
             self.terminate("System Shutdown")
 
     def process(self, raw):
-        
+        parts = raw.split(' ')
+        cmd_name = parts[0]
+        cmd_type = commands.CommandMeta.commands[cmd_name]
+        cmd = cmd_type(*parts[1:])
+        return cmd
 
     def terminate(self, msg):
         print(f"Terminating server with message: {msg}")
